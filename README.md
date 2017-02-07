@@ -41,7 +41,7 @@ must be present:
 - allow_only_users
   - You could limit who could use the bot hosted by you. You can either
   whitelist a user by id or username. Example: [999999,"fancy_user"] would allow
-  the 2 users to use your hosted bot
+  the 2 users to use your hosted bot. An empty list would allow all
 
 ## Dependency
 - Python 3 (developed and tested on 3.5)
