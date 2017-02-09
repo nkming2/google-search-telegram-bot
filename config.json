@@ -2,5 +2,9 @@
 	"telegram_bot_token": "",
 	"google_api_key": "",
 	"search_engine_id": "",
-	"allow_only_users": []
+	"allow_only_users": [],
+	"paw_app": {
+		"url": "https://YOUR_PYTHONANYWHERE_USERNAME.pythonanywhere.com",
+		"webhook_secret": ""
+	}
 }
