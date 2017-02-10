@@ -4,7 +4,7 @@ import urllib3
 
 from app.config_loader import ConfigLoader
 from app.log import Log
-from app.message_handler import MessageHandler, InlineMessageHandler
+from app.message_handler import MessageHandler, InlineMessageNoThreadHandler
 
 flask_app = None
 
@@ -15,7 +15,6 @@ class PawApp():
 		Log.i("Initializing PAW app")
 		self._init_paw_telepot()
 		self._bot = telepot.Bot(self.TELEGRAM_TOKEN)
-		self._answerer = telepot.helper.Answerer(self._bot)
 
 	def run(self):
 		url = ConfigLoader.load("paw_app")["url"]
@@ -52,6 +51,6 @@ class PawApp():
 			MessageHandler(self._bot, update["message"]).handle()
 		elif "inline_query" in update:
 			# inline request
-			InlineMessageHandler(self._bot, self._answerer,
-					update["inline_query"]).handle()
+			InlineMessageNoThreadHandler(self._bot, update["inline_query"]) \
+					.handle()
 		return "OK"
