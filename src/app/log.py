@@ -6,6 +6,7 @@ def _build_logger():
 	product.setLevel(1)
 	handler = logging.StreamHandler()
 	handler.setLevel(1)
+	handler.setFormatter(logging.Formatter("%(asctime)s\n%(message)s"))
 	product.addHandler(handler)
 	return product
 
