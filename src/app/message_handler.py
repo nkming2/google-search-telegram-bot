@@ -194,7 +194,7 @@ class MessageHandler():
 
 def _markdown_escape(str):
 	import re
-	return re.sub(r"([*_#\(\)\[\]<>])", r"\\\1", str)
+	return re.sub(r"([*_#\[\]<>])", r"\\\1", str)
 
 def _format_msg(cse_item):
 	title = _markdown_escape(cse_item["title"])
