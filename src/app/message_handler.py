@@ -49,7 +49,7 @@ class _QueryHandler():
 		return args
 
 ## Bot logic when it's called in an inline mannar
-class InlineMessageHandler():
+class _InlineMessageBaseHandler():
 	RESPONSE_EXCEPTION = [InlineQueryResultArticle(id = str(uuid.uuid4()),
 			title = "Error",
 			description = "Ehmm... I feel like I'm sick, mind contacting my parents about this?",
@@ -70,24 +70,9 @@ class InlineMessageHandler():
 		"switch_pm_text": "Please click here to start a private chat with me first",
 	}
 
-	def __init__(self, bot, answerer, msg):
+	def __init__(self, bot, msg):
 		self._bot = bot
-		self._answerer = answerer
 		self._msg = msg
-
-	def handle(self):
-		def _callback():
-			try:
-				self._ensure_allowed_users()
-				return self._do_handle()
-			except _WhitelistException as e:
-				Log.i("Disallowed user (%s) is chating with us"
-						% self._msg["from"]["first_name"])
-				return self.RESPONSE_DISALLOWED_USER
-			except Exception as e:
-				Log.e("Failed while _do_handle", e)
-				return self.RESPONSE_EXCEPTION
-		self._answerer.answer(self._msg, _callback)
 
 	def _do_handle(self):
 		Log.v(self._msg)
@@ -154,6 +139,51 @@ class InlineMessageHandler():
 	def _build_result_id(self, url):
 		import hashlib
 		return hashlib.sha256(url.encode("utf-8")).hexdigest()
+
+## Inline handler for normal use
+class InlineMessageHandler(_InlineMessageBaseHandler):
+	def __init__(self, bot, answerer, msg):
+		super().__init__(bot, msg)
+		self._answerer = answerer
+
+	def handle(self):
+		def _callback():
+			try:
+				self._ensure_allowed_users()
+				return self._do_handle()
+			except _WhitelistException as e:
+				Log.i("Disallowed user (%s) is chating with us"
+						% self._msg["from"]["first_name"])
+				return self.RESPONSE_DISALLOWED_USER
+			except Exception as e:
+				Log.e("Failed while _do_handle", e)
+				return self.RESPONSE_EXCEPTION
+		self._answerer.answer(self._msg, _callback)
+
+## Inline handler that doesn't use thread (Answerer). This would likely results
+#  in more meaningless requests. Only intended for PAW use as they have disabled
+#  threading support
+class InlineMessageNoThreadHandler(_InlineMessageBaseHandler):
+	def handle(self):
+		try:
+			self._ensure_allowed_users()
+			response = self._do_handle()
+		except _WhitelistException as e:
+			Log.i("Disallowed user (%s) is chating with us"
+					% self._msg["from"]["first_name"])
+			response = self.RESPONSE_DISALLOWED_USER
+		except Exception as e:
+			Log.e("Failed while _do_handle", e)
+			response = self.RESPONSE_EXCEPTION
+
+		if isinstance(response, list):
+			self._bot.answerInlineQuery(self._glance["query_id"], response)
+		elif isinstance(response, tuple):
+			self._bot.answerInlineQuery(self._glance["query_id"], *response)
+		elif isinstance(response, dict):
+			self._bot.answerInlineQuery(self._glance["query_id"], **response)
+		else:
+			raise ValueError("Invalid response format")
 
 ## Bot logic when it's called in a private chat
 class MessageHandler():
