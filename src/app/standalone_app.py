@@ -25,6 +25,7 @@ class StandaloneApp():
 			self._on_message(msg)
 		def _inline_listener(msg):
 			self._on_inline_message(msg)
+		self._bot.setWebhook("")
 		self._bot.message_loop({
 			"chat": _listener,
 			"inline_query": _inline_listener,
