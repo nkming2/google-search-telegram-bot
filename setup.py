@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 requires = [
 	"requests",
 	"telepot",
+	"flask",
 ]
 
 setup(name = "google-search-telegram-bot",

@@ -1,5 +1,6 @@
 # Ignore all dirs except src
 */*
 !src/*
+!misc/*
 # Ignore __pycache__ under src/
 __pycache__
