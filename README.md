@@ -1,15 +1,13 @@
 # Unofficial Google Search Bot for Telegram
 Telegram bot (support both inline/chat) that return search results from Google
 
-## I can't find this bot on Telegram?
-This bot is only available in source form but not on Telegram because Google has
-imposed a **100 searches per day** limits in their API unless you start paying. As
-an idependent dev, it's not something I could afford. Sorry, but it has to be
-like that
-
-(Technically it's possible to store and use a separate API key per user, but I
-strongly believe that it's against their TOS. It's something that could be
-easily implemented, though)
+## How to use
+You are strongly advised to host your own as Google has imposed a **100 searches
+per day** limits on their API unless you start paying. As an idependent dev,
+it's not something I could afford. Currently you could test the bot at
+[https://telegram.me/GoogleSearchUnofficialBot], but it's only intended for
+evaluation purpose due to the limited quota available. Sorry, but it has to be
+like this
 
 ## Run instruction
 ```
