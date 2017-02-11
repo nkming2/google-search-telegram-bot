@@ -25,7 +25,11 @@ class _QueryHandler():
 
 	@Lazy
 	def is_empty(self):
-		return not self.filtered_text
+		import re
+		# Remove all symbols and see if anything left
+		characters = re.sub(r"[\t\n ./<>?;:\"'`!@#$%\^&*()\[\]{}_+=|\\-]", "",
+				self.filtered_text)
+		return not characters
 
 	@Lazy
 	def request_args(self):
