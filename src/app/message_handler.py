@@ -29,7 +29,7 @@ class _QueryHandler():
 
 	@Lazy
 	def is_image(self):
-		return self._text.startswith("image")
+		return self._text.lower().startswith("image")
 
 	@Lazy
 	def is_empty(self):
@@ -190,7 +190,7 @@ class MessageHandler():
 	RESPONSE_NON_TEXTUAL_INPUT = "Sorry I can only read text \U0001F62E"
 	RESPONSE_EXCEPTION = "Ehmm... I feel like I'm sick \U0001F635 Mind contacting my parents about this (with a screenshot of our conversation if you don't mind) at https://github.com/nkming2/google-search-telegram-bot ?"
 	RESPONSE_NO_RESULTS = "No results found! \u2639"
-	RESPONSE_HI_TEMPLATE = "Hi there \U0001F44B\U0001F600 You can initiate a search by typing your query here, or using the inline syntax @%s [SEARCH_QUERY...] in your other chats.\n\nThis bot is open source! Visit us at https://github.com/nkming2/google-search-telegram-bot"
+	RESPONSE_HI_TEMPLATE = "Hi there \U0001F44B\U0001F600 You can initiate a search by typing your query here, or using the inline syntax @%s [SEARCH_QUERY...] in your other chats. You can also start an image search by beginning your search query with \"image\"\n\nThis bot is open source! Visit us at https://github.com/nkming2/google-search-telegram-bot"
 	RESPONSE_UNKNOWN_CMD = "Ehmm I don't quite undertand \U0001F914"
 	RESPONSE_NO_MORE_QUOTA = "Google has rejected my search request. \u2639 You may have run out of your daily Custom Search quota"
 	RESPONSE_MD_DISALLOWED_USER = "Sorry, due to a *very limited* Search API usage quota imposed by Google, I could only serve a small amount of audience.\n\n*However, I am open source and you could easily host me with your own API key*. Visit my home for more details at https://github.com/nkming2/google-search-telegram-bot"
