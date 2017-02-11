@@ -29,7 +29,7 @@ class _QueryHandler():
 
 	@Lazy
 	def is_image(self):
-		return self._text.startswith("image")
+		return self._text.lower().startswith("image")
 
 	@Lazy
 	def is_empty(self):
