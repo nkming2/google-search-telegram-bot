@@ -1,5 +1,6 @@
 # Unofficial Google Search Bot for Telegram
-Telegram bot (support both inline/chat) that return search results from Google
+Telegram bot (support both inline/chat) that return search results (web/image)
+from Google
 
 ## I can't find this bot on Telegram?
 This bot is only available in source form but not on Telegram because Google has
