@@ -15,6 +15,25 @@ class _ChanelException(Exception):
 class _WhitelistException(Exception):
 	pass
 
+class _QueryHandler():
+	def __init__(self, text):
+		self._text = text
+
+	@Lazy
+	def filtered_text(self):
+		return self._text
+
+	@Lazy
+	def is_empty(self):
+		return not self.filtered_text
+
+	@Lazy
+	def request_args(self):
+		args = {
+			"q": self.filtered_text,
+		}
+		return args
+
 ## Bot logic when it's called in an inline mannar
 class InlineMessageHandler():
 	RESPONSE_EXCEPTION = [InlineQueryResultArticle(id = str(uuid.uuid4()),
@@ -58,11 +77,11 @@ class InlineMessageHandler():
 
 	def _do_handle(self):
 		Log.v(self._msg)
-		if not self._glance["query_string"]:
-			# Empty string
+		query = _QueryHandler(self._glance["query_string"])
+		if query.is_empty:
 			return []
 		try:
-			response = CustomSearchApi().list(self._glance["query_string"])
+			response = CustomSearchApi().list(**query.request_args)
 		except CustomSearchApi.NetworkError as e:
 			Log.e("Failed while list %d: %s" % (e.status_code, e.message))
 			if e.status_code == 403:
@@ -158,8 +177,11 @@ class MessageHandler():
 				parse_mode = "Markdown")
 
 	def _build_response_text(self, text):
+		query = _QueryHandler(text)
+		if query.is_empty:
+			return self.RESPONSE_NO_RESULTS
 		try:
-			response = CustomSearchApi().list(text)
+			response = CustomSearchApi().list(**query.request_args)
 		except CustomSearchApi.NetworkError as e:
 			Log.e("Failed while list %d: %s" % (e.status_code, e.message))
 			if e.status_code == 404:
