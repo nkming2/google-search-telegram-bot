@@ -14,16 +14,17 @@ class CustomSearchApi():
 			self.message = message if message else \
 					"%d while requesting %s" % (status_code, url)
 
-	def list(self, q):
+	def list(self, q, **kwargs):
 		Log.d("Searching: %s" % q)
 		if not q:
 			return {}
-		args = {
+		args = dict(kwargs)
+		args.update({
 			"key": self.API_KEY,
 			"cx": self.SEARCH_ENGINE_ID,
 			"safe": "medium",
 			"q": q,
-		}
+		})
 		with http_request("GET", self.URL, params = args) as response:
 			if response.status_code != 200:
 				Log.e("Failed while list: %d" % response.status_code)
