@@ -1,5 +1,6 @@
 import telepot
-from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
+from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent, \
+		InlineQueryResultPhoto
 import uuid
 
 from app.custom_search_api import CustomSearchApi
@@ -21,7 +22,14 @@ class _QueryHandler():
 
 	@Lazy
 	def filtered_text(self):
-		return self._text
+		if self.is_image:
+			return self._text[len("image"):].strip()
+		else:
+			return self._text
+
+	@Lazy
+	def is_image(self):
+		return self._text.startswith("image")
 
 	@Lazy
 	def is_empty(self):
@@ -36,6 +44,8 @@ class _QueryHandler():
 		args = {
 			"q": self.filtered_text,
 		}
+		if self.is_image:
+			args["searchType"] = "image"
 		return args
 
 ## Bot logic when it's called in an inline mannar
@@ -80,6 +90,12 @@ class _InlineMessageBaseHandler():
 		if not response or "items" not in response:
 			return self.RESPONSE_NO_RESULTS
 
+		if query.is_image:
+			return self._build_image_response(response)
+		else:
+			return self._build_text_response(response)
+
+	def _build_text_response(self, response):
 		results = []
 		for it in response["items"]:
 			msg = "%s" % _format_msg(it)
@@ -91,6 +107,20 @@ class _InlineMessageBaseHandler():
 							message_text = msg,
 							parse_mode = "Markdown"),
 					url = it["link"])]
+		return results if results else self.RESPONSE_NO_RESULTS
+
+	def _build_image_response(self, response):
+		results = []
+		for it in response["items"]:
+			image = it["image"]
+			results += [InlineQueryResultPhoto(
+					id = self._build_result_id(it["link"]),
+					photo_url = it["link"],
+					thumb_url = image["thumbnailLink"],
+					photo_width = image["width"],
+					photo_height = image["height"],
+					title = it["title"],
+					description = it["snippet"])]
 		return results if results else self.RESPONSE_NO_RESULTS
 
 	def _ensure_allowed_users(self):
@@ -186,6 +216,34 @@ class MessageHandler():
 			self._bot.sendMessage(self._glance["chat_id"],
 					self.RESPONSE_EXCEPTION)
 
+	class _TextResponse():
+		def __init__(self, content, type = "Markdown"):
+			self._content = content
+			self._type = type
+
+		def send(self, bot, chat_id):
+			args = {
+				"chat_id": chat_id,
+				"text": self._content,
+			}
+			if self._type:
+				args["parse_mode"] = self._type
+			bot.sendMessage(**args)
+
+	class _ImageResponse():
+		def __init__(self, image, caption = None):
+			self._image = image
+			self._caption = caption
+
+		def send(self, bot, chat_id):
+			args = {
+				"chat_id": chat_id,
+				"photo": self._image,
+			}
+			if self._caption:
+				args["caption"] = self._caption
+			bot.sendPhoto(**args)
+
 	def _do_handle(self):
 		Log.v(self._msg)
 		if self._glance["content_type"] == "text":
@@ -206,31 +264,50 @@ class MessageHandler():
 					self.RESPONSE_UNKNOWN_CMD)
 
 	def _handle_text(self, text):
-		response = self._build_response_text(text)
-		self._bot.sendMessage(self._glance["chat_id"], response,
-				parse_mode = "Markdown")
+		response = self._build_response(text)
+		if isinstance(response, list):
+			for r in response:
+				r.send(self._bot, self._glance["chat_id"])
+		else:
+			response.send(self._bot, self._glance["chat_id"])
 
-	def _build_response_text(self, text):
+	def _build_response(self, text):
 		query = _QueryHandler(text)
 		if query.is_empty:
-			return self.RESPONSE_NO_RESULTS
+			return self._TextResponse(self.RESPONSE_NO_RESULTS)
 		try:
 			response = CustomSearchApi().list(**query.request_args)
 		except CustomSearchApi.NetworkError as e:
 			Log.e("Failed while list %d: %s" % (e.status_code, e.message))
 			if e.status_code == 404:
-				return self.RESPONSE_NO_MORE_QUOTA
+				return self._TextResponse(self.RESPONSE_NO_MORE_QUOTA)
 			else:
 				raise e
 		if not response or "items" not in response:
-			return self.RESPONSE_NO_RESULTS
+			return self._TextResponse(self.RESPONSE_NO_RESULTS)
 
+		if query.is_image:
+			return self._build_image_response(response)
+		else:
+			return self._build_text_response(response)
+
+	def _build_text_response(self, response):
 		msg = ""
 		for i, it in enumerate(response["items"]):
 			if i > 2:
 				break
 			msg += "%s\n\n" % _format_msg(it)
-		return msg.strip() if msg else self.RESPONSE_NO_RESULTS
+		return self._TextResponse(msg.strip() if msg else \
+				self.RESPONSE_NO_RESULTS)
+
+	def _build_image_response(self, response):
+		responses = []
+		for i, it in enumerate(response["items"]):
+			if i > 2:
+				break
+			responses += [self._ImageResponse(it["link"], caption = it["title"])]
+		return responses if responses else \
+				self._TextResponse(self.RESPONSE_NO_RESULTS)
 
 	def _ensure_supported_chat(self):
 		if "from" not in self._msg:
