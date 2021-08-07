@@ -1,10 +1,10 @@
 {
-	"telegram_bot_token": "",
-	"google_api_key": "",
-	"search_engine_id": "",
-	"allow_only_users": [],
+	"telegram_bot_token": "1871807850:AAH3IQc4-oP8qIW7a8kFtHwhgbGopERU4Hw",
+	"google_api_key": "254142021574-smb33ng1j2rdij0a64eladtb92dqj6km.apps.googleusercontent.com",
+	"search_engine_id": "94cfd63c5537b4245",
+	"allow_only_users": [999999],
 	"paw_app": {
-		"url": "https://YOUR_PYTHONANYWHERE_USERNAME.pythonanywhere.com",
+		"url": "https://YOUR_PYTHONANYWHERE_Killersparrow0.pythonanywhere.com",
 		"webhook_secret": ""
 	}
 }
